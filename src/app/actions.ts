@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, redirect } from "next/cache";
 import { createClient } from "@/utils/supabase/server";
 import { projectSchema, ProjectFormData } from "@/lib/schema";
 
@@ -59,4 +59,10 @@ export async function deleteProject(id: string) {
 
   revalidatePath("/");
   return { success: true };
+}
+
+export async function logout() {
+  const supabase = await createClient();
+  await supabase.auth.signOut();
+  revalidatePath("/");
 }
