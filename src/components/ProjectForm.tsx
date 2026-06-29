@@ -1,5 +1,7 @@
 "use client";
 
+import { z } from "zod";
+
 import { useEffect, useState } from "react";
 import { useTransition } from "react";
 import { useForm } from "react-hook-form";
@@ -46,7 +48,7 @@ export function ProjectForm({
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
-  const form = useForm<ProjectFormData>({
+const form = useForm<z.input<typeof projectSchema>, any, ProjectFormData>({
     resolver: zodResolver(projectSchema),
     defaultValues: {
       title: "",
