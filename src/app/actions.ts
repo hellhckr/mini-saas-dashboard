@@ -1,6 +1,7 @@
 "use server";
 
-import { revalidatePath, redirect } from "next/cache";
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 import { projectSchema, ProjectFormData } from "@/lib/schema";
 
