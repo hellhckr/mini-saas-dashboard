@@ -87,7 +87,7 @@ const form = useForm<z.input<typeof projectSchema>, any, ProjectFormData>({
         : await createProject(data);
 
       if ("error" in result) {
-        setError(result.error);
+        setError(result.error || "An unknown error occurred during the request.");
       } else {
         form.reset();
         onOpenChange(false);

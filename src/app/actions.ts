@@ -5,6 +5,8 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 import { projectSchema, ProjectFormData } from "@/lib/schema";
 
+export type ServerActionResponse = { error: string } | { success: boolean };
+
 export async function createProject(data: ProjectFormData) {
   const validated = projectSchema.safeParse(data);
   if (!validated.success) {
