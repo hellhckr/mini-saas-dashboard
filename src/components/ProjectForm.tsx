@@ -195,6 +195,7 @@ const form = useForm<z.input<typeof projectSchema>, any, ProjectFormData>({
                       step="0.01"
                       placeholder="0.00"
                       {...field}
+                      value={field.value as string | number}
                     />
                   </FormControl>
                   <FormDescription>
