@@ -9,7 +9,7 @@ export const projectSchema = z.object({
       message: "Invalid date",
     }),
   assigned_team_member: z.string().min(2, "Name required"),
-  budget: z.coerce.number().positive("Must be greater than 0"),
+  budget: z.coerce.number({ invalid_type_error: "Must be greater than 0" }),
 });
 
 export type ProjectFormData = z.infer<typeof projectSchema>;
