@@ -1,11 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useTransition } from "react";
 import { deleteProject } from "@/app/actions";
 import { ProjectFormData } from "@/lib/schema";
 import { ProjectForm } from "./ProjectForm";
-import { createClient } from "@/utils/supabase/client";
 import {
   Table,
   TableBody,
@@ -34,50 +33,15 @@ const statusColors: Record<string, string> = {
 
 export function ProjectTable({ initialData }: ProjectTableProps) {
   const [isPending, startTransition] = useTransition();
-  const [projects, setProjects] = useState<Project[]>(initialData);
   const [formOpen, setFormOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<
     (Project & { id: string }) | undefined
   >();
-  const [isLoading, setIsLoading] = useState(false);
-
-  const refetchProjects = async () => {
-    setIsLoading(true);
-    try {
-      const supabase = createClient();
-      const { data, error } = await supabase
-        .from("projects")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (error) {
-        console.error("Error fetching projects:", error);
-      } else {
-        setProjects(data || []);
-      }
-    } catch (error) {
-      console.error("Fetch error:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (!formOpen && !editingProject) {
-      const timer = setTimeout(() => {
-        refetchProjects();
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-  }, [formOpen, editingProject]);
 
   async function handleDelete(id: string) {
     if (confirm("Are you sure you want to delete this project?")) {
       startTransition(async () => {
-        const result = await deleteProject(id);
-        if (!("error" in result)) {
-          await refetchProjects();
-        }
+        await deleteProject(id);
       });
     }
   }
@@ -98,23 +62,15 @@ export function ProjectTable({ initialData }: ProjectTableProps) {
     <>
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-semibold">Projects</h2>
-        <Button 
-          className="bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-md"
+        <Button className="bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-md"
           onClick={() => {
             setEditingProject(undefined);
             setFormOpen(true);
           }}
-          disabled={isLoading}
         >
           + New Project
         </Button>
       </div>
-
-      {isLoading && (
-        <div className="text-center py-4 text-muted-foreground">
-          Updating projects...
-        </div>
-      )}
 
       <div className="border rounded-lg overflow-hidden">
         <Table>
@@ -129,14 +85,15 @@ export function ProjectTable({ initialData }: ProjectTableProps) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {projects.length === 0 ? (
+            {}
+            {initialData.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={6} className="text-center py-8 text-gray-500">
                   No projects yet. Create one to get started!
                 </TableCell>
               </TableRow>
             ) : (
-              projects.map((project) => (
+              initialData.map((project) => (
                 <TableRow key={project.id}>
                   <TableCell className="font-medium">{project.title}</TableCell>
                   <TableCell>
@@ -153,7 +110,6 @@ export function ProjectTable({ initialData }: ProjectTableProps) {
                         variant="outline"
                         size="sm"
                         onClick={() => handleEdit(project)}
-                        disabled={isLoading}
                       >
                         Edit
                       </Button>
@@ -161,7 +117,7 @@ export function ProjectTable({ initialData }: ProjectTableProps) {
                         variant="destructive"
                         size="sm"
                         onClick={() => handleDelete(project.id)}
-                        disabled={isPending || isLoading}
+                        disabled={isPending}
                       >
                         Delete
                       </Button>

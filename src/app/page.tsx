@@ -1,12 +1,15 @@
 import { createClient } from "@/utils/supabase/server";
 import { ProjectTable } from "@/components/ProjectTable";
-import { LogoutButton } from "@/components/LogoutButton";
+import { SearchFilters } from "@/components/SearchFilters";
 
 export default async function Dashboard({
   searchParams,
 }: {
-  searchParams: { status?: string };
+  searchParams: Promise<{ status?: string; search?: string }>;
 }) {
+
+  const params = await searchParams;
+
   const supabase = await createClient();
 
   let query = supabase
@@ -14,35 +17,44 @@ export default async function Dashboard({
     .select("*")
     .order("created_at", { ascending: false });
 
-  if (searchParams.status) {
-    query = query.eq("status", searchParams.status);
+  // Filter by status
+  if (params.status) {
+    query = query.eq("status", params.status);
   }
 
-  const { data: projects, error } = await query;
+  const { data: allProjects, error } = await query;
 
   if (error) {
     console.error("Database error:", error);
   }
 
+  let filteredProjects = allProjects || [];
+  if (params.search) {
+    const searchLower = params.search.toLowerCase();
+    filteredProjects = filteredProjects.filter((project) =>
+      project.title.toLowerCase().includes(searchLower)
+    );
+  }
+
   return (
     <main className="min-h-screen bg-background">
       <div className="max-w-6xl mx-auto px-4 py-12">
-        {/* Header Section */}
-        <div className="flex justify-between items-start mb-12">
-          <div>
-            <h1 className="text-4xl font-bold text-foreground mb-2">
-              Project Dashboard
-            </h1>
-            <p className="text-muted-foreground">
-              Manage your projects efficiently with real-time updates.
-            </p>
-          </div>
-          <LogoutButton />
+        {/* Header */}
+        <div className="mb-12">
+          <h1 className="text-4xl font-bold text-foreground mb-2">
+            Project Dashboard
+          </h1>
+          <p className="text-muted-foreground">
+            Manage your projects efficiently with real-time updates.
+          </p>
         </div>
+
+        {/* Search & Filters */}
+        <SearchFilters />
 
         {/* Content Card */}
         <div className="bg-card rounded-lg shadow border border-border p-6">
-          <ProjectTable initialData={projects || []} />
+          <ProjectTable initialData={filteredProjects} />
         </div>
       </div>
     </main>
