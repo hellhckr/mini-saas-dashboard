@@ -1,7 +1,7 @@
 import { createClient } from "@/utils/supabase/server";
 import { ProjectTable } from "@/components/ProjectTable";
 import { SearchFilters } from "@/components/SearchFilters";
-
+import { LogoutButton } from "@/components/LogoutButton";
 export default async function Dashboard({
   searchParams,
 }: {
@@ -40,7 +40,8 @@ export default async function Dashboard({
     <main className="min-h-screen bg-background">
       <div className="max-w-6xl mx-auto px-4 py-12">
         {/* Header */}
-        <div className="mb-12">
+        <div className="flex justify-between items-start mb-12">
+          <div>
           <h1 className="text-4xl font-bold text-foreground mb-2">
             Project Dashboard
           </h1>
@@ -48,6 +49,8 @@ export default async function Dashboard({
             Manage your projects efficiently with real-time updates.
           </p>
         </div>
+        <LogoutButton />
+      </div>
 
         {/* Search & Filters */}
         <SearchFilters />
